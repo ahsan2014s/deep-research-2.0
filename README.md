@@ -5,6 +5,7 @@ An AI-powered research assistant that performs iterative, deep research on any t
 The goal of this repo is to provide the simplest implementation of a deep research agent - e.g. an agent that can refine its research direction over time and deep dive into a topic. Goal is to keep the repo size at <500 LoC so it is easy to understand and build on top of.
 
 The deep-research-2.0 introduces proper methodology for research. Most of the time the model seems to wander around the internet and find biased or conflicting sources, which results in inconclusive research. The deep-research-2.0 restricts research upto authorstative sites.
+
 Deep-research Original author: [X/Twitter](https://x.com/dzhng). This project is sponsored by [Aomni](https://aomni.com).
 
 ## How It Works
