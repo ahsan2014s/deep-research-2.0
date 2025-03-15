@@ -70,6 +70,15 @@ async function generateSerpQueries({
               .describe(
                 `First talk about the goal of the research that this query is meant to accomplish, 
                 then go deeper into how to advance the research once the results are found, mention additional research directions.
+                Follow this structure strictly for scientific and engineering researches:
+                  1. Gather informations from book, research papers, journals, scholarly sources or authoritative sources. Avoid biased, unknown sources.
+                  2. Gather data from different researches and surveys. 
+                    i) Classify the data, preprocess them and merge them,
+                    ii) Determine the best suited statistical model for analyzing the data,
+                    iii) Clean the data,
+                    iv) Analyze the data using python and matplotlib.
+                    v) Gather intuition from the analyzed data. Now, make assumption based on the intuition you have gathered.
+                  3. Now provide the user with clear directions based on your assumption from step 2. Also, provide the analyzed data, your assumption and research directions.
                 Be as specific as possible, especially for additional research directions.`,
               ),
           }),
