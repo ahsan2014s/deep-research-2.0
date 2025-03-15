@@ -11,6 +11,85 @@ function log(...args: any[]) {
   console.log(...args);
 }
 
+// Determine which crawler library to use based on the environment variable
+const crawlerName = process.env.CRAWLER || 'CRAWL4AI';
+let searchFunction: (query: string, options: any) => Promise<{ data: Array<{ markdown: string; url?: string }> }>;
+
+// If the CRAWLER env var is set to "CRAWL4AI", use the HTTP API
+if (crawlerName === 'CRAWL4AI') {
+  // Create a wrapper for the Crawl4AI HTTP API
+  const crawl4aiBaseUrl = process.env.CRAWL4AI_BASE_URL ?? 'http://localhost:11111';
+  const crawl4aiAPIToken = process.env.CRAWL4AI_API_TOKEN ?? '';
+   
+  searchFunction = async (query: string, options: any) => {
+  const headers = {
+       'Authorization': `Bearer ${crawl4aiAPIToken}`,
+       'Content-Type': 'application/json',
+     };
+ 
+     // Submit crawl job
+     const response = await fetch(`${crawl4aiBaseUrl}/crawl`, {
+       method: 'POST',
+       headers,
+       body: JSON.stringify({
+         urls: query,
+         priority: 10,
+         ...(options.timeout && { ttl: options.timeout }),
+         ...(options.limit && { max_results: options.limit }),
+       })
+     });
+ 
+     if (!response.ok) {
+       throw new Error(`Crawl4AI API error: ${response.statusText}`);
+     }
+ 
+     const { task_id } = await response.json();
+     
+     // Poll for result with timeout
+     const startTime = Date.now();
+     while (true) {
+       if (Date.now() - startTime > (options.timeout || 15000)) {
+         throw new Error('Timeout waiting for Crawl4AI result');
+       }
+ 
+       const statusResponse = await fetch(`${crawl4aiBaseUrl}/task/${task_id}`, {
+         headers
+       });
+       
+       if (!statusResponse.ok) {
+         throw new Error(`Crawl4AI status check error: ${statusResponse.statusText}`);
+       }
+ 
+       const status = await statusResponse.json();
+ 
+       if (status.status === 'completed') {
+         // Transform Crawl4AI response to match Firecrawl's format
+         return {
+           data: [{
+             markdown: status.result.markdown,
+             url: query
+           }]
+         };
+       }
+ 
+       // Wait before polling again
+       await new Promise(resolve => setTimeout(resolve, 2000));
+     }
+   };
+ } else {
+   // Default to using FIRECRAWL
+   const { default: FirecrawlApp } = require('@mendable/firecrawl-js');
+   // Instantiate Firecrawl with optional API keys/URLs
+   const firecrawl = new FirecrawlApp({
+     apiKey: process.env.FIRECRAWL_KEY ?? '',
+     apiUrl: process.env.FIRECRAWL_BASE_URL,
+   });
+   searchFunction = async (query: string, options: any) => {
+     return await firecrawl.search(query, options);
+   };
+ }
+ 
+
 export type ResearchProgress = {
   currentDepth: number;
   totalDepth: number;
