@@ -51,7 +51,9 @@ async function generateSerpQueries({
   const res = await generateObject({
     model: getModel(),
     system: systemPrompt(),
-    prompt: `Given the following prompt from the user, generate a list of SERP queries to research the topic. Return a maximum of ${numQueries} queries, but feel free to return less if the original prompt is clear. Make sure each query is unique and not similar to each other: <prompt>${query}</prompt>\n\n${
+    prompt: `Given the following prompt from the user, generate a list of SERP queries to research the topic. 
+    Return a maximum of ${numQueries} queries, but feel free to return less if the original prompt is clear. 
+    Make sure each query is unique and not similar to each other: <prompt>${query}</prompt>\n\n${
       learnings
         ? `Here are some learnings from previous research, use them to generate more specific queries: ${learnings.join(
             '\n',
@@ -66,7 +68,9 @@ async function generateSerpQueries({
             researchGoal: z
               .string()
               .describe(
-                'First talk about the goal of the research that this query is meant to accomplish, then go deeper into how to advance the research once the results are found, mention additional research directions. Be as specific as possible, especially for additional research directions.',
+                `First talk about the goal of the research that this query is meant to accomplish, 
+                then go deeper into how to advance the research once the results are found, mention additional research directions.
+                Be as specific as possible, especially for additional research directions.`,
               ),
           }),
         )
@@ -136,7 +140,29 @@ export async function writeFinalReport({
     model: getModel(),
     system: systemPrompt(),
     prompt: trimPrompt(
-      `Given the following prompt from the user, write a final report on the topic using the learnings from research. Make it as as detailed as possible, aim for 3 or more pages, include ALL the learnings from research:\n\n<prompt>${prompt}</prompt>\n\nHere are all the learnings from previous research:\n\n<learnings>\n${learningsString}\n</learnings>`,
+      `Given the following prompt from the user, write a final report on the topic using the learnings from research. 
+      Use APA format. Keep it strictly professional. Do not even try to use emojis or unnecessary markings.
+        1. Your essay should include four major sections: the Title, Abstract, Main Body, and References.
+        2. Include keywords in Abstract.
+        3. All sections and sub sections that you must include:
+            Title 
+            Abstract
+            Introduction
+            Method
+            Results
+            Discussion
+            References
+            Appendices(if necessary)
+            Tables and/or figures (if necessary)
+        4. Things to cover
+            Why the topic is important (covered in your introduction)
+            What the problem is (also covered in your introduction)
+            What you did to try to solve the problem (covered in your methods section)
+            What you found (covered in your results section)
+            What you think your findings mean (covered in your discussion section)
+        5. Use APA 7 style referencing. 
+        
+      Make it is as detailed as possible, aim for 4 or more pages, include ALL the learnings from research:\n\n<prompt>${prompt}</prompt>\n\nHere are all the learnings from previous research:\n\n<learnings>\n${learningsString}\n</learnings>`,
     ),
     schema: z.object({
       reportMarkdown: z
@@ -165,7 +191,13 @@ export async function writeFinalAnswer({
     model: getModel(),
     system: systemPrompt(),
     prompt: trimPrompt(
-      `Given the following prompt from the user, write a final answer on the topic using the learnings from research. Follow the format specified in the prompt. Do not yap or babble or include any other text than the answer besides the format specified in the prompt. Keep the answer as concise as possible - usually it should be just a few words or maximum a sentence. Try to follow the format specified in the prompt (for example, if the prompt is using Latex, the answer should be in Latex. If the prompt gives multiple answer choices, the answer should be one of the choices).\n\n<prompt>${prompt}</prompt>\n\nHere are all the learnings from research on the topic that you can use to help answer the prompt:\n\n<learnings>\n${learningsString}\n</learnings>`,
+      `Given the following prompt from the user, write a final answer on the topic using the learnings from research. 
+      Follow the format specified in the prompt. Do not yap or babble or include any other text than the answer in the specified APA format besides the format specified in the prompt. 
+      Keep the answer as concise as possible - usually it should be just a few words or maximum a sentence. 
+      Try to follow the format specified in the prompt (for example, if the prompt is using Latex, the answer should be in Latex. 
+      Provide the data you have found earlier in csv format as resources.
+      If the prompt gives multiple answer choices, the answer should be one of the choices).\n\n<prompt>${prompt}</prompt>\n\nHere are all the learnings 
+      from research on the topic that you can use to help answer the prompt:\n\n<learnings>\n${learningsString}\n</learnings>`,
     ),
     schema: z.object({
       exactAnswer: z
